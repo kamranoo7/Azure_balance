@@ -113,6 +113,9 @@ def send_screenshot_to_slack(screenshot_path):
 def show_screenshot():
     return render_template('show_screenshot.html', screenshot_url=url_for('static', filename='screenshot.png'))
 
+
+take_screenshot()
+
 if __name__ == '__main__':
     scheduler = BackgroundScheduler()
     scheduler.add_job(take_screenshot, 'interval', seconds=35)
