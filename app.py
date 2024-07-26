@@ -100,27 +100,30 @@ def send_screenshot_to_slack(screenshot_path):
                 initial_comment="Here is the latest Azure balance screenshot.",
                 file=file
             )
-        assert response["file"]  # the uploaded file
-        print("Screenshot uploaded to Slack successfully")
+        if 'file' in response:
+            print("Screenshot uploaded to Slack successfully")
+        else:
+            print("Upload completed but check response for unexpected results.")
     except SlackApiError as e:
         print(f"Failed to upload screenshot to Slack: {e.response['error']}")
         if e.response['error'] == 'not_in_channel':
             print("Invite the bot to the channel by typing '/invite @your-bot-name' in the channel.")
         elif e.response['error'] == 'channel_not_found':
             print("Make sure the channel ID is correct and the bot has access to it.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+
+
 
 @app.route('/show-screenshot')
 def show_screenshot():
     return render_template('show_screenshot.html', screenshot_url=url_for('static', filename='screenshot.png'))
 
-
-take_screenshot()
-
 if __name__ == '__main__':
     scheduler = BackgroundScheduler()
     scheduler.add_job(take_screenshot, 'interval', seconds=35)
     scheduler.start()
-    
+
     # To keep the main thread alive and allow the scheduler to run in the background
     try:
         app.run(host='0.0.0.0', port=5000, use_reloader=False)
